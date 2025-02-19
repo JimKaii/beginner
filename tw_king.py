@@ -11,7 +11,7 @@ soup = BeautifulSoup(r.text, 'html.parser')
 
 
 
-# soup.find_all('div', class_='booktop')
+
 # booktops = soup.find_all('div', attrs={"class": "booktop"})
 #     #sol.1
 # for booktop in booktops:
@@ -23,8 +23,10 @@ soup = BeautifulSoup(r.text, 'html.parser')
 #         top_url = top.a.get('href')
          
         
-# collection      
+# collection     
+
 book_summarize = dict()
+soup.find_all('div', class_='booktop') 
 booktops = soup.find_all('div', attrs={"class": "booktop"})
 for booktop in booktops:
     tops = booktop.find_all('p')
