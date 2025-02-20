@@ -6,7 +6,8 @@ def chat_with_gpt(user_message, system_prompt):
         model="gpt-4o-mini",
         messages=[
             {
-                "role": system_prompt
+                "role": "system",
+                "content":system_prompt
             },
             {
                 "role": "user",
