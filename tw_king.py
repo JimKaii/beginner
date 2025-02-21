@@ -52,7 +52,7 @@ for booktop in booktops:
 sorted_booktop_summarize = sorted(
         book_summarize.items(), 
         reverse=True, 
-        key=lambda x:x[1]['count'])
+        key=lambda x: x[1]['count'])
 
 
 book_rows = list()

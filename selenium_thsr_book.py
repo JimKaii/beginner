@@ -10,37 +10,39 @@ import os
 #第一個頁面
 
 options = webdriver.ChromeOptions()  # 創立 driver物件所需的參數物件
-options.add_argument("--disable-blink-features=AutomationControlled")
-driver = webdriver.Chrome(options=options)
+options.add_argument("--disable-blink-features=AutomationControlled")  # 禁用自動化檢測 避免被網站檢測
+driver = webdriver.Chrome(options=options)  # 創建一個 Chrome 瀏覽器實例
 driver.get("https://irs.thsrc.com.tw/IMINT/")
 
 # Click accept cookie button
 cookie_confirm = driver.find_element(By.ID, "cookieAccpetBtn")
 cookie_confirm.click()
 
-
+start_station = "台中"
+dest_station = "台北"
+start_time = '10:00'
+start_date = '二月 22, 2025'
 
 # Choose Booking parameters: startStation, destStation, time
 # 找 出發站 到達站 時間
 departure_station = driver.find_element(By.NAME, 'selectStartStation')                                       
-Select(departure_station).select_by_visible_text("台中")
+Select(departure_station).select_by_visible_text(start_station)
 
 arrival_station = driver.find_element(By.NAME, 'selectDestinationStation')                                          
-Select(arrival_station).select_by_visible_text("台北")
+Select(arrival_station).select_by_visible_text(dest_station)
 
-arrival_time = driver.find_element(By.NAME, 'toTimeTable')
-Select(arrival_time).select_by_visible_text("07:30")
+departure_time = driver.find_element(By.NAME, 'toTimeTable')
+Select(departure_time).select_by_visible_text(start_time)
 
 # Choose Booking parameters: date
 # 選擇 搭乘日期
 driver.find_element(
     By.XPATH, "//input[@class='uk-input' and @readonly='readonly']").click()
 
-start_date = "二月 22, 2025"
 driver.find_element(
     By.XPATH, f"//span[@class='flatpickr-day' and @aria-label='{start_date}']").click()
    
-
+# Validation
 while True:
 # captcha
     captcha_pic = driver.find_element(By.ID, "BookingS1Form_homeCaptcha_passCode")
