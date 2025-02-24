@@ -9,22 +9,23 @@ import pprint
 import time
 import os
 
-#第一個頁面
 def create_drive():
     options = webdriver.ChromeOptions()  # 創立 driver物件所需的參數物件
     options.add_argument("--disable-blink-features=AutomationControlled")  # 禁用自動化檢測 避免被網站檢測
     global driver
     driver = webdriver.Chrome(options=options)  # 創建一個 Chrome 瀏覽器實例
     driver.get("https://irs.thsrc.com.tw/IMINT/")
-    
-# Click accept cookie button
-    cookie_confirm = driver.find_element(By.ID, "cookieAccpetBtn")
-    cookie_confirm.click()
+   
 
-    
+
+#第一個頁面    
 # Choose Booking parameters: startStation, destStation, time
 # 找 出發站 到達站 時間
 def book_choose_time(start_station, dest_station, start_time, start_date):
+    cookie_confirm = driver.find_element(By.ID, "cookieAccpetBtn")
+    cookie_confirm.click()
+    # Choose Booking parameters: startStation, destStation, time
+    # 找 出發站 到達站 時間
     departure_station = driver.find_element(By.NAME, 'selectStartStation')                                       
     Select(departure_station).select_by_visible_text(start_station)
 
@@ -34,31 +35,21 @@ def book_choose_time(start_station, dest_station, start_time, start_date):
     departure_time = driver.find_element(By.NAME, 'toTimeTable')
     Select(departure_time).select_by_visible_text(start_time)
 
-# Choose Booking parameters: date
-# 選擇 搭乘日期
-
     driver.find_element(
         By.XPATH, "//input[@class='uk-input' and @readonly='readonly']").click()
 
     driver.find_element(
         By.XPATH, f"//span[@class='flatpickr-day' and @aria-label='{start_date}']").click()
-    
-    # Validation
+   
     while True:
-    # captcha
         captcha_pic = driver.find_element(By.ID, "BookingS1Form_homeCaptcha_passCode")
         captcha_pic.screenshot('captcha.png')
         captcha_code = get_captcha_code()
         captcha_enter = driver.find_element(By.ID, "securityCode")
         captcha_enter.send_keys(captcha_code)
         time.sleep(2)
-
-        # submit
         departure_date = driver.find_element(By.ID, "SubmitButton").click()
-        departure_date()
-    
-
-    # check validation is success or not   
+        departure_date()    
         try:
             time.sleep(5)
             # driver.find_element(By.CLASS_NAME, 'alert-content uk-flex') 
@@ -132,8 +123,27 @@ def select_train_and_submit_booking(trains_info):
         By.CLASS_NAME, 'ticket-summary').screenshot(screenshot_file)
     print("訂票完成!")
 
-    return
+    return screenshot_file
 
-time.sleep(2000)
+if __name__ == "__main__":
+
+    # Booking parameters
+    start_station = '台中'
+    dest_station = '板橋'
+    start_time = '18:00'
+    start_date = '二月 25, 2025'
+
+    create_drive()
+
+    #Step 1, 2
+    trains_info = book_choose_time(
+        start_station, dest_station, start_time, start_date)
+
+    # Step 3, 4
+    select_train_and_submit_booking(trains_info)
+
+
+
+time.sleep(20)
 driver.quit()
 
