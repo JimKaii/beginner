@@ -9,6 +9,14 @@ import pprint
 import time
 import os
 
+#Project modlues   
+                            ###   把 訂票對話 導入
+from booking_info_extraction_flow import(
+    ask_booking_infomation,
+    ask_missing_infomation,
+    convert_date_to_thsr_format
+)
+
 def create_drive():
     options = webdriver.ChromeOptions()  # 創立 driver物件所需的參數物件
     options.add_argument("--disable-blink-features=AutomationControlled")  # 禁用自動化檢測 避免被網站檢測
@@ -22,6 +30,8 @@ def create_drive():
 # Choose Booking parameters: startStation, destStation, time
 # 找 出發站 到達站 時間
 def book_choose_time(start_station, dest_station, start_time, start_date):
+#第一個頁面 
+    time.sleep(3)
     cookie_confirm = driver.find_element(By.ID, "cookieAccpetBtn")
     cookie_confirm.click()
     # Choose Booking parameters: startStation, destStation, time
@@ -39,7 +49,8 @@ def book_choose_time(start_station, dest_station, start_time, start_date):
         By.XPATH, "//input[@class='uk-input' and @readonly='readonly']").click()
 
     driver.find_element(
-        By.XPATH, f"//span[@class='flatpickr-day' and @aria-label='{start_date}']").click()
+        By.XPATH,
+        f"//span[(@class='flatpickr-day' or @class='flatpickr-day today selected') and @aria-label='{start_date}']").click()
    
     while True:
         captcha_pic = driver.find_element(By.ID, "BookingS1Form_homeCaptcha_passCode")
@@ -48,8 +59,8 @@ def book_choose_time(start_station, dest_station, start_time, start_date):
         captcha_enter = driver.find_element(By.ID, "securityCode")
         captcha_enter.send_keys(captcha_code)
         time.sleep(2)
-        departure_date = driver.find_element(By.ID, "SubmitButton").click()
-        departure_date()    
+        driver.find_element(By.ID, "SubmitButton").click()
+            
         try:
             time.sleep(5)
             # driver.find_element(By.CLASS_NAME, 'alert-content uk-flex') 
@@ -74,11 +85,11 @@ def book_choose_time(start_station, dest_station, start_time, start_date):
                 'radio_box': info,
             }   
     )
-    return trains_info
+    
 
 
-def select_train_and_submit_booking(trains_info):
-# Choose train
+
+    # Choose train
     for idx, train in enumerate(trains_info):
         print(
             f"({idx}) - {train['train_code']}, \
@@ -87,6 +98,10 @@ def select_train_and_submit_booking(trains_info):
             {train['arrival_time']}"
         )
 
+    return trains_info
+
+def select_train_and_submit_booking(trains_info, which_train):
+
     which_train = int(input("Choose your train. Enter from 0~9: "))
     trains_info[which_train]['radio_box'].click()
 
@@ -94,7 +109,7 @@ def select_train_and_submit_booking(trains_info):
     print("車次選擇完成，進入第三步驟")
     time.sleep(5)
 
-    #  第三個頁面  
+#  第三個頁面  
 
     # Check booking infomation for user
     driver.find_element(By.CLASS_NAME, "ticket-summary").screenshot('thsr_summary.png')
@@ -125,25 +140,40 @@ def select_train_and_submit_booking(trains_info):
 
     return screenshot_file
 
+
 if __name__ == "__main__":
 
     # Booking parameters
-    start_station = '台中'
-    dest_station = '板橋'
-    start_time = '18:00'
-    start_date = '二月 25, 2025'
+    # start_station = '台中'
+    # dest_station = '板橋'
+    # start_time = '18:00'
+    # start_date = '二月 25, 2025'
 
-    create_drive()
+                     ### 這是導入chatgpt做成一個 訂票對話 的程式 
+    #Step 1:
+    booking_info = ask_booking_infomation()
+    #Step 2:
+    booking_info = ask_missing_infomation(booking_info)
+    #Step 3:
+    booking_info = convert_date_to_thsr_format(booking_info)
+    
+                        #再將 訂票對話 與原本 訂票爬蟲 合併
 
-    #Step 1, 2
+    create_drive() # 爬蟲
+
+    #Step 4      
     trains_info = book_choose_time(
-        start_station, dest_station, start_time, start_date)
+    start_station = booking_info['出發點'], 
+    dest_station =  booking_info['抵達點'],
+    start_date =  booking_info['出發日期'],
+    start_time = booking_info['出發時辰']
+        )
 
-    # Step 3, 4
-    select_train_and_submit_booking(trains_info)
+    # Step 5
+    select_train_and_submit_booking(trains_info)    
 
 
 
-time.sleep(20)
-driver.quit()
+    time.sleep(20)
+    driver.quit()
 
