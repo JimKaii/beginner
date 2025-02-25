@@ -100,14 +100,16 @@ def book_choose_time(start_station, dest_station, start_time, start_date):
 
     return trains_info
 
-def select_train_and_submit_booking(trains_info, which_train):
+def select_train_and_submit_booking(trains_info, which_train=None):
+    if which_train is None:
+        # 如果沒有選擇車次，則由使用者選擇(一般程式的執行流程，採用CMD輸入)
+        which_train = int(input("Choose your train. Enter from 0~9: "))
 
-    which_train = int(input("Choose your train. Enter from 0~9: "))
     trains_info[which_train]['radio_box'].click()
 
     driver.find_element(By.NAME, "SubmitButton").click()
     print("車次選擇完成，進入第三步驟")
-    time.sleep(5)
+    
 
 #  第三個頁面  
 
@@ -174,6 +176,5 @@ if __name__ == "__main__":
 
 
 
-    time.sleep(20)
-    driver.quit()
+    
 
